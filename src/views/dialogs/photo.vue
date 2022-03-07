@@ -1,0 +1,154 @@
+
+
+<template>
+  <div>
+    <v-card-title>
+      <div class="row">
+        <div class="col-md-12" style="padding: 0">
+          <h5 style="font-size: small">
+            REF. NO:{{ this.IData.referenceNumber }}
+          </h5>
+        </div>
+        <div class="col-md-12" style="padding: 0">
+          <h5 style="font-size: small">
+            NAME:
+            {{
+              this.IData.firstName.toUpperCase() +
+              " " +
+              this.IData.lastName.toUpperCase()
+            }}
+          </h5>
+        </div>
+        <div class="col-md-12" style="padding: 0">
+          <h5 style="font-size: small">
+            CITY: {{ this.IData.city.toUpperCase() }}
+          </h5>
+        </div>
+      </div>
+    </v-card-title>
+
+    <v-data-table
+      dense
+      :headers="headers"
+      :items="desserts"
+      item-key="name"
+      loading="loadTable"
+      loading-text="Loading... Please wait"
+      class="elevation-1"
+      show-expand
+    single-expand=true
+      :expanded.sync="expanded"
+
+
+
+    >
+  
+      <template v-slot:[`item.filename`]="{ item }">
+        <div v-if="item.filename">
+               <div > <img :src="item.filename" style="width: 50px; height: 50px" /></div>
+       
+        </div>
+        <div v-else>
+          <v-btn x-small> Upload </v-btn>
+        </div>
+      </template>
+      <template v-slot:expanded-item="{ headers, item }">
+       <td :colspan="headers.length">
+
+           <div v-if="item.filename">
+               <img :src="item.filename" style="width: 250px; height: 250px" />
+           <v-spacer></v-spacer>
+   <v-btn @click="downloadImg(item.filename)" small class="warning">download</v-btn>
+       
+        </div>
+        <div v-else>
+         <v-span>No Information</v-span>
+        </div>
+          
+      </td>
+      </template>
+   
+
+    </v-data-table>
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+export default {
+  data: () => ({
+    Udata: {
+      referenceNumber: "",
+    },
+    Rdata: {
+      preferenceNo: "",
+    },
+    IData: {
+      firstName: "",
+      lastName: "",
+      referenceNumber: "",
+      city: "",
+    },
+  
+    expanded: [],
+  
+    loadTable: false,
+    desserts: [],
+    headers: [
+      {
+        text: "ID",
+        align: "start",
+        sortable: false,
+        value: "id",
+      },
+
+      { text: "NAME", value: "NAME" },
+      { text: "CODE", value: "code" },
+      { text: "DATE CREATED", value: "dtcreated" },
+      { text: "Image", value: "filename" },
+      { text: '', value: 'data-table-expand' },
+    ],
+  }),
+  
+  props: ["data"],
+
+  watch: {
+    data: function () {
+      console.log(this.$props.data.referenceNumber);
+      this.Rdata.preferenceNo = this.$props.data.referenceNumber;
+      console.log(this.Rdata);
+      this.IData = this.$props.data;
+      axios
+        .post("http://161.49.63.45:8087/api/Ibas/PhotoWeb", this.Rdata, {
+          //headers: {
+          // Authorization: `Bearer ${this.authToken}`,
+          // Accept: "application/json",
+          //},
+        })
+        .then((res) => {
+          this.desserts = res.data.photoType;
+          this.loadTable = false;
+          console.log(this.res);
+        });
+      //this.loadPhoto();
+    },
+  },
+    methods: {
+    downloadImg(responseUrl) {
+           
+        const lastItem = responseUrl.substring(responseUrl.lastIndexOf('/') + 1)
+    
+        const url = window.URL.createObjectURL(new Blob([responseUrl]));
+        const link = document.createElement("a");
+        link.href = url;
+       link.setAttribute("download", lastItem); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+
+        
+    }
+
+  },
+  
+};
+</script>
