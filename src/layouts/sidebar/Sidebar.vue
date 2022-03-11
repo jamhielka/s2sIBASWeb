@@ -75,21 +75,21 @@ export default {
     ],
   }),
   computed: {
-    // ...mapState(["SidebarColor", "SidebarBg"]),
     ...mapState({
-      SidebarColor: (state) => state.SidebarModule.SidebarColor,
-      SidebarBg: (state) => state.SidebarModule.SidebarBg,
+      SidebarColor: (state) => state.SidebarDrawerModule.SidebarColor,
+      SidebarBg: (state) => state.SidebarDrawerModule.SidebarBg,
     }),
-      showItemState () {
-      return this.$store.getters.getUsername;
-      },
     Sidebar_drawer: {
       get() {
-        return this.$store.state.SidebarModule.Sidebar_drawer;
+        return this.$store.state.Sidebar_drawer;
       },
       set(val) {
         this.$store.commit("SET_SIDEBAR_DRAWER", val);
       },
+    },
+
+    showItemState() {
+      return this.$store.getters.getUsername;
     },
     
   },
