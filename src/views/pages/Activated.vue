@@ -21,39 +21,18 @@
           hide-details
         ></v-text-field>
 
-        <v-dialog v-model="dialog" max-width="600px">
-          <v-card>
-            <v-card-title class="text-h5">Photo</v-card-title>
-            <v-card-text>
-              <PhotoDialog :data="approveData"></PhotoDialog>
-            </v-card-text>
-            <v-card-actions> 
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close">Close</v-btn>
+        <PhotoDialog
+          :data="approveData"
+          :dialog="photoDialog.dialog"
+          @close="photoDialog.dialog = !photoDialog.dialog"
+        ></PhotoDialog>
 
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-
-        <v-dialog v-model="dialogMaterials" max-width="600px">
-          <v-card>
-             <v-card-title class="text-h5">Materials</v-card-title>
-            <v-card-text>
-              <MaterialsDialog :data="materialsData"></MaterialsDialog>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete"
-                >Close</v-btn
-              >
-              <v-btn color="Warning" text @click="ItemConfirm"
-                >Completed</v-btn
-              >
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+        <MaterialsDialog
+          :data="materialsData"
+          :dialog="materialsDialog.dialog"
+          @close="materialsDialog.dialog = !materialsDialog.dialog"
+          @ItemConfirmed="ItemConfirm()"
+        ></MaterialsDialog>
       </v-toolbar>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
@@ -73,7 +52,7 @@
 </template>
 <script>
 //import moment from "moment";
-import axios from "axios";
+//import axios from "axios";
 import PhotoDialog from "../dialogs/photo.vue";
 import MaterialsDialog from "../dialogs/materials.vue";
 export default {
@@ -85,10 +64,10 @@ export default {
     search: "",
     approveData: {},
     materialsData: {},
-    dialog: false,
-    dialogMaterials: false,
-    dialogSchedule: false,
-    loadTable:false,
+
+    photoDialog: { dialog: false },
+    materialsDialog: { dialog: false },
+    loadTable: false,
     headers: [
       {
         text: "Reference Number",
@@ -112,7 +91,6 @@ export default {
     editedIndex: -1,
     editedItem: {
       referenceNumber: "",
-     
     },
     scheduleItem: {
       employeeId: 0,
@@ -177,64 +155,23 @@ export default {
       // console.log( Object.assign({}, item));
       this.approveData = Object.assign({}, item);
 
-      this.dialog = true;
+      this.photoDialog.dialog = true;
     },
-    SchedItemConfirm() {
-      var TToken = localStorage.getItem("token");
-      console.log("token", TToken);
-      //this.scheduleItem.date=moment(this.scheduleItem.date).format("MM-DD-YYYY");
-      console.log("log", this.scheduleItem.shiftId);
-      console.log("log", this.scheduleItem.date);
-      console.log("log", this.scheduleItem.employeeId);
-      // this.scheduleItem.employeeId = ;
-      // this.desserts.splice(this.editedIndex, 1);
-
-      axios
-        .post(
-          "http://161.49.63.45:8085/api/admin/schedule",
-          this.scheduleItem,
-          {
-            headers: {
-              Authorization: `Bearer ${this.authToken}`,
-              Accept: "application/json",
-            },
-          }
-        )
-        .then((response) => {
-          console.log(response);
-          this.dialogSchedule = false;
-        });
-
-      this.closeSched();
-    },
-    //scheduleItemX(item) {
-    //this.$router.push({
-    // name: 'Add Employee',
-    // params: {
-    //      editedItemX: Object.assign({}, item)
-    //  }
-    //});/
-
-    //this.scheduleItem.employeeId=item._id;
-    // this.loadShift();
-    //this.approveData= Object.assign({}, item);
-
-    // this.dialogSchedule = true;
-    //},
 
     MaterialsItem(item) {
       this.materialsData = Object.assign({}, item);
-      this.dialogMaterials = true;
+      this.materialsDialog.dialog = true;
     },
 
     ItemConfirm() {
-     // var TToken = localStorage.getItem("token");
+      
+      // var TToken = localStorage.getItem("token");
       console.log("ItemConfirm " + this.materialsData.referenceNumber);
-   this.editedItem.referenceNumber=this.materialsData.referenceNumber;
+      this.editedItem.referenceNumber = this.materialsData.referenceNumber;
       this.$api
         .post(
           "acquisition/complete-jo",
-          
+
           this.editedItem
         )
         .then((response) => {
@@ -243,80 +180,21 @@ export default {
           // this.loadingBtn = false;
 
           this.dialog = false;
-          alert(this.materialsData.firstName+""+this.materialsData.lastName+" is successfully completed");
+          alert(
+            this.materialsData.firstName +
+              "" +
+              this.materialsData.lastName +
+              " is successfully completed"
+          );
         })
         .catch((e) => {
           console.log(e);
           //this.loadingBtn = false;
         });
-      this.closeDelete();
+     this.materialsDialog.dialog = false;
     },
 
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    closeDelete() {
-      this.dialogMaterials = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-    closeSched() {
-      this.dialogSchedule = false;
-    },
-    save() {
-      var TToken = localStorage.getItem("token");
-      if (this.editedIndex > -1) {
-        this.$api
-          .put("/admin/employee", this.editedItem, {
-            headers: {
-              Authorization: TToken,
-            },
-          })
-          .then((response) => {
-            console.log(response);
-            this.$emit("obj", true);
-            // this.loadingBtn = false;
-
-            this.dialog = false;
-            alert("employee is successfully edited");
-          })
-          .catch((e) => {
-            console.log(e);
-            //this.loadingBtn = false;
-          });
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
-      } else {
-        this.$api
-          .post("/admin/employee", this.editedItem, {
-            headers: {
-              Authorization: TToken,
-            },
-          })
-          .then((response) => {
-            console.log(response);
-            this.$emit("obj", true);
-            // this.loadingBtn = false;
-
-            this.dialog = false;
-            alert("employee is successfully created");
-            this.initialize();
-          })
-          .catch((e) => {
-            console.log(e);
-            //this.loadingBtn = false;
-          });
-      }
-      this.close();
-    },
-    
-
+   
   },
 };
 </script>

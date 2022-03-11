@@ -2,55 +2,58 @@
 
 <template>
   <div>
-    <v-card-title>
-      <div class="row">
-        <div class="col-md-12" style="padding: 0">
-          <h5 style="font-size: small">
-            REF. NO:{{ this.IData.referenceNumber }}
-          </h5>
-        </div>
-        <div class="col-md-12" style="padding: 0">
-          <h5 style="font-size: small">
-            NAME:
-            {{
-              this.IData.firstName.toUpperCase() +
-              " " +
-              this.IData.lastName.toUpperCase()
-            }}
-          </h5>
-        </div>
-        <div class="col-md-12" style="padding: 0">
-          <h5 style="font-size: small">
-            CITY: {{ this.IData.city.toUpperCase() }}
-          </h5>
-        </div>
-      </div>
-    </v-card-title>
+    <v-dialog v-model="dialog" max-width="600px">
+      <v-card>
+        <v-card-title class="text-h5">Photo</v-card-title>
+        <v-card-text>
+          <v-card-title>
+            <div class="row">
+              <div class="col-md-12" style="padding: 0">
+                <h5 style="font-size: small">
+                  REF. NO:{{ this.IData.referenceNumber }}
+                </h5>
+              </div>
+              <div class="col-md-12" style="padding: 0">
+                <h5 style="font-size: small">
+                  NAME:
+                  {{
+                    this.IData.firstName.toUpperCase() +
+                    " " +
+                    this.IData.lastName.toUpperCase()
+                  }}
+                </h5>
+              </div>
+              <div class="col-md-12" style="padding: 0">
+                <h5 style="font-size: small">
+                  CITY: {{ this.IData.city.toUpperCase() }}
+                </h5>
+              </div>
+            </div>
+          </v-card-title>
 
-    <v-data-table
-   
-      :headers="headers"
-      :items="desserts"
-      item-key="referenceNumber"
-      loading="loadTable"
-      loading-text="Loading... Please wait"
-      class="elevation-1"
-    
-
-
-
-    >
-  
-      <template v-slot:[`item.filename`]="{ item }">
-        <div v-if="item.filename">
-               <div > <img :src="item.filename" @click="downloadImg(item.filename)" style="width: 50px; height: 50px" /></div>
-       
-        </div>
-        <div v-else>
-          <v-btn x-small> Upload </v-btn>
-        </div>
-      </template>
-      <!-- <template v-slot:expanded-item="{ headers, item }">
+          <v-data-table
+            :headers="headers"
+            :items="desserts"
+            item-key="referenceNumber"
+            loading="loadTable"
+            loading-text="Loading... Please wait"
+            class="elevation-1"
+          >
+            <template v-slot:[`item.filename`]="{ item }">
+              <div v-if="item.filename">
+                <div>
+                  <img
+                    :src="item.filename"
+                    @click="downloadImg(item.filename)"
+                    style="width: 50px; height: 50px"
+                  />
+                </div>
+              </div>
+              <div v-else>
+                <v-btn x-small> Upload </v-btn>
+              </div>
+            </template>
+            <!-- <template v-slot:expanded-item="{ headers, item }">
        <td :colspan="headers.length">
 
            <div v-if="item.filename">
@@ -66,8 +69,16 @@
       </td>
       </template>
     -->
+          </v-data-table>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="close()">Close</v-btn>
 
-    </v-data-table>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -87,9 +98,7 @@ export default {
       referenceNumber: "",
       city: "",
     },
-  
 
-  
     loadTable: false,
     desserts: [],
     headers: [
@@ -104,14 +113,14 @@ export default {
       { text: "CODE", value: "code" },
       { text: "DATE CREATED", value: "dtcreated" },
       { text: "Image", value: "filename" },
-      { text: '', value: 'data-table-expand' },
+      { text: "", value: "data-table-expand" },
     ],
   }),
-  
-  props: ["data"],
+
+  props: ["data", "dialog"],
 
   watch: {
-    data: function () {
+    dialog: function () {
       console.log(this.$props.data.referenceNumber);
       this.Rdata.preferenceNo = this.$props.data.referenceNumber;
       console.log(this.Rdata);
@@ -131,37 +140,40 @@ export default {
       //this.loadPhoto();
     },
   },
-    methods: {
+  methods: {
     downloadImg(responseUrl) {
-           
-     
-    
-        axios({
-    method: "GET",
-    url: responseUrl, //
-    responseType: "blob",
-    config: {
-        headers: {
-           //'Access-Control-Allow-Origin': '*',
-            'Accept': 'image/*'
-        }
-    }
-}).then(function(response) {
-       const lastItem = responseUrl.substring(responseUrl.lastIndexOf('/') + 1)
-    
-    const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', lastItem);
-    document.body.appendChild(link);
-    link.click();
-})
-.catch(function(error) {
-    alert(error);
-});
-    }
+      axios({
+        method: "GET",
+        url: responseUrl, //
+        responseType: "blob",
+        config: {
+          headers: {
+            //'Access-Control-Allow-Origin': '*',
+            Accept: "image/*",
+          },
+        },
+      })
+        .then(function (response) {
+          const lastItem = responseUrl.substring(
+            responseUrl.lastIndexOf("/") + 1
+          );
 
+          const downloadUrl = window.URL.createObjectURL(
+            new Blob([response.data])
+          );
+          const link = document.createElement("a");
+          link.href = downloadUrl;
+          link.setAttribute("download", lastItem);
+          document.body.appendChild(link);
+          link.click();
+        })
+        .catch(function (error) {
+          alert(error);
+        });
+    },
+    close() {
+      this.$emit("close", false);
+    },
   },
-  
 };
 </script>

@@ -12,3 +12,13 @@ export const API = axios.create({
   //  password: _password
  // }
 });
+export const API2 = axios.create({
+  baseURL: `http://161.49.63.45:8087/api`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  //auth: {
+   // username: _username,
+  //  password: _password
+ // }
+});

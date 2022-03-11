@@ -4,7 +4,7 @@ import vuetify from './plugins/vuetify'
 import router from './router/router'
 import store from './store/index'
 import './plugins/base'
-import { API } from "../http-common";
+import { API, API2 } from "../http-common";
 import DatetimePicker from 'vuetify-datetime-picker'
 import ECharts from 'vue-echarts'
 import { use } from 'echarts/core'
@@ -40,15 +40,16 @@ Vue.use(DatetimePicker)
 
 
 Vue.use({
-    install(Vue) {
-        Vue.prototype.$api = API
-    }
+  install(Vue) {
+    Vue.prototype.$api = API
+    Vue.prototype.$api2 = API2
+  }
 });
 Vue.config.productionTip = false
 
 new Vue({
-    vuetify,
-    store,
-    router,
-    render: h => h(App)
+  vuetify,
+  store,
+  router,
+  render: h => h(App)
 }).$mount('#app')
