@@ -25,17 +25,18 @@
 
       <v-data-table
     dense
-    :headers="headers"
-    :items="desserts"
-    item-key="name"
-        loading="loadTable"
-    loading-text="Loading... Please wait"
-    class="elevation-1"
+      :headers="headers"
+      :items="desserts"
+      item-key="name"
+      loading="loadTable"
+      loading-text="Loading... Please wait"
+      class="elevation-1"
+  
   
   >
-    <template v-slot:[`item.filename`]="{ item }">
-        <div v-if="item.filename">
-             <img :src="item.filename" style="width: 50px; height: 50px" />
+    <template v-slot:[`item.quantity`]="{ item }">
+        <div v-if="item.quantity">
+             {{item.quantity}}
         </div>
         <div v-else>
             <v-btn x-small >
@@ -66,6 +67,7 @@
 </template>
 
 <script>
+
 import axios from "axios";
 export default {
   data: () => ({

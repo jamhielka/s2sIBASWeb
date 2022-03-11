@@ -28,16 +28,14 @@
     </v-card-title>
 
     <v-data-table
-      dense
+   
       :headers="headers"
       :items="desserts"
-      item-key="name"
+      item-key="referenceNumber"
       loading="loadTable"
       loading-text="Loading... Please wait"
       class="elevation-1"
-      show-expand
-    single-expand=true
-      :expanded.sync="expanded"
+    
 
 
 
@@ -45,14 +43,14 @@
   
       <template v-slot:[`item.filename`]="{ item }">
         <div v-if="item.filename">
-               <div > <img :src="item.filename" style="width: 50px; height: 50px" /></div>
+               <div > <img :src="item.filename" @click="downloadImg(item.filename)" style="width: 50px; height: 50px" /></div>
        
         </div>
         <div v-else>
           <v-btn x-small> Upload </v-btn>
         </div>
       </template>
-      <template v-slot:expanded-item="{ headers, item }">
+      <!-- <template v-slot:expanded-item="{ headers, item }">
        <td :colspan="headers.length">
 
            <div v-if="item.filename">
@@ -67,7 +65,7 @@
           
       </td>
       </template>
-   
+    -->
 
     </v-data-table>
   </div>
@@ -90,7 +88,7 @@ export default {
       city: "",
     },
   
-    expanded: [],
+
   
     loadTable: false,
     desserts: [],
@@ -136,16 +134,31 @@ export default {
     methods: {
     downloadImg(responseUrl) {
            
-        const lastItem = responseUrl.substring(responseUrl.lastIndexOf('/') + 1)
+     
     
-        const url = window.URL.createObjectURL(new Blob([responseUrl]));
-        const link = document.createElement("a");
-        link.href = url;
-       link.setAttribute("download", lastItem); //or any other extension
-        document.body.appendChild(link);
-        link.click();
-
-        
+        axios({
+    method: "GET",
+    url: responseUrl, //
+    responseType: "blob",
+    config: {
+        headers: {
+           //'Access-Control-Allow-Origin': '*',
+            'Accept': 'image/*'
+        }
+    }
+}).then(function(response) {
+       const lastItem = responseUrl.substring(responseUrl.lastIndexOf('/') + 1)
+    
+    const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', lastItem);
+    document.body.appendChild(link);
+    link.click();
+})
+.catch(function(error) {
+    alert(error);
+});
     }
 
   },

@@ -36,7 +36,7 @@
           </v-card>
         </v-dialog>
 
-        <v-dialog v-model="dialogMaterials" max-width="500px">
+        <v-dialog v-model="dialogMaterials" max-width="600px">
           <v-card>
              <v-card-title class="text-h5">Materials</v-card-title>
             <v-card-text>

@@ -14,9 +14,9 @@
     <v-list dense nav>
       <!---USer Area -->
       <v-list-item two-line class="px-0">
-        <v-list-item-avatar>
+        <!-- <v-list-item-avatar>
           <img src="https://randomuser.me/api/portraits/men/81.jpg" />
-        </v-list-item-avatar>
+        </v-list-item-avatar> -->
 
         <v-list-item-content>
           <v-list-item-title>{{showItemState}}</v-list-item-title>

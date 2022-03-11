@@ -22,7 +22,7 @@
         hide-details
       ></v-text-field>
        
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-dialog v-model="dialog" max-width="600px">
           <v-card>
             <v-card-title class="text-h5">Photo</v-card-title>
             <v-card-text>
@@ -37,7 +37,7 @@
           </v-card>
         </v-dialog>
     
-        <v-dialog v-model="dialogMaterials" max-width="500px">
+        <v-dialog v-model="dialogMaterials" max-width="600px">
           <v-card>
             <v-card-text>
               <MaterialsDialog :data="materialsData"></MaterialsDialog>
