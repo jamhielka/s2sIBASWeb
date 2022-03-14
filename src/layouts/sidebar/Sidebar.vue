@@ -62,7 +62,7 @@ export default {
       
 
       {
-        title: "Approved JO",
+        title: "Activated JO",
         icon: "mdi-application",
         to: "/Activated",
       },

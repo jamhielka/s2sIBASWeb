@@ -53,7 +53,7 @@
                 </div>
               </div>
               <div v-else>
-                <v-btn x-small> Upload </v-btn>
+               
               </div>
             </template>
             <!-- <template v-slot:expanded-item="{ headers, item }">
@@ -151,7 +151,7 @@ export default {
         responseType: "blob",
         config: {
           headers: {
-            //'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': '*',
             Accept: "image/*",
           },
         },
