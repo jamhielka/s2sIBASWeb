@@ -42,11 +42,14 @@
             <template v-slot:[`item.filename`]="{ item }">
               <div v-if="item.filename">
                 <div>
-                  <img
+                  <a :href="item.filename" download target="_black">
+                     <img
                     :src="item.filename"
-                    @click="downloadImg(item.filename)"
+                    
                     style="width: 50px; height: 50px"
                   />
+                  </a>
+                 
                 </div>
               </div>
               <div v-else>
