@@ -42,19 +42,15 @@
             <template v-slot:[`item.filename`]="{ item }">
               <div v-if="item.filename">
                 <div>
-                  <a :href="item.filename" download target="_black">
-                     <img
-                    :src="item.filename"
-                    
-                    style="width: 50px; height: 50px"
-                  />
+                  <a href="#" @click.prevent="downloadImage(item.filename)">
+                    <img
+                      :src="item.filename"
+                      style="width: 50px; height: 50px"
+                    />
                   </a>
-                 
                 </div>
               </div>
-              <div v-else>
-               
-              </div>
+              <div v-else></div>
             </template>
             <!-- <template v-slot:expanded-item="{ headers, item }">
        <td :colspan="headers.length">
@@ -144,6 +140,23 @@ export default {
     },
   },
   methods: {
+    downloadImage(url) {
+      const filename = url.split("/").pop();
+      fetch(url)
+        .then((resp) => resp.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.style.display = "none";
+          a.href = url;
+          // the filename you want
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+        })
+        .catch((err) => alert(err));
+    },
     downloadImg(responseUrl) {
       axios({
         method: "GET",
@@ -151,7 +164,7 @@ export default {
         responseType: "blob",
         config: {
           headers: {
-            'Access-Control-Allow-Origin': '*',
+            "Access-Control-Allow-Origin": "*",
             Accept: "image/*",
           },
         },
