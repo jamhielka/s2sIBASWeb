@@ -30,6 +30,12 @@
               </div>
             </div>
           </v-card-title>
+<v-btn color="primary" class="ml-auto">
+                    <download-csv :data="exportData" :name="`${fileName}.csv`">
+                      <v-icon dense>mdi-download</v-icon>
+                      Export
+                    </download-csv>
+                  </v-btn>
 
           <v-data-table
             dense
@@ -77,6 +83,7 @@
 </template>
 
 <script>
+import moment from "moment";
 export default {
   data: () => ({
     Udata: {
@@ -107,6 +114,8 @@ export default {
       { text: "DATE CREATED", value: "dtcreated" },
       { text: "QUANTITY", value: "quantity" },
     ],
+    exportData:[],
+    fileName:"",
   }),
   props: ["data", "dialog"],
 
@@ -126,7 +135,23 @@ export default {
         .then((res) => {
           this.desserts = res.data.materials;
           this.loadTable = false;
-          console.log(this.res);
+          let exportData = res.data.materials.map((item) => {
+            return {
+              "Subscriber_Name": this.IData.firstName.toUpperCase() +
+                    " " +
+                    this.IData.lastName.toUpperCase(),
+              "Reference_No":  this.Rdata.preferenceNo ,
+              "Name": item.NAME,
+              "Code": item.CODE,
+              "Quantity": item.quantity,
+              " Date": item.dtcreated ? moment(item.dtcreated).format("MMMM DD, YYYY hh:mm:ss") : "",
+              
+            };
+          });
+          this.fileName = `Ibas_materials_${moment(
+            moment().toDate()
+          ).format("MMM_DD_YYYY")}`;
+          this.exportData = exportData;
         });
       //this.loadPhoto();
     },

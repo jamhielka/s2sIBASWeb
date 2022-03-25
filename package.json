@@ -20,6 +20,7 @@
     "vue": "^2.6.12",
     "vue-echarts": "^6.0.2",
     "vue-i18n": "^8.22.0",
+    "vue-json-csv": "^1.2.12",
     "vue-router": "^3.4.6",
     "vue-the-mask": "^0.11.1",
     "vuelidate": "^0.7.4",

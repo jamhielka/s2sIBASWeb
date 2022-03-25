@@ -30,6 +30,12 @@
               </div>
             </div>
           </v-card-title>
+<v-btn color="primary" class="ml-auto">
+                    <download-csv :data="exportData" :name="`${fileName}.csv`">
+                      <v-icon dense>mdi-download</v-icon>
+                      Export
+                    </download-csv>
+                  </v-btn>
 
           <v-data-table
             :headers="headers"
@@ -40,15 +46,16 @@
             class="elevation-1"
           >
             <template v-slot:[`item.filename`]="{ item }">
-              <div v-if="item.filename">
-                <div>
-                  <a :href="item.filename" download target="_black">
+              <div v-if="item.filename" >
+                <div @click="downloadImg(item.filename)">
+                
                      <img
                     :src="item.filename"
                     
                     style="width: 50px; height: 50px"
+                   
                   />
-                  </a>
+                  
                  
                 </div>
               </div>
@@ -87,6 +94,7 @@
 
 <script>
 import axios from "axios";
+import moment from "moment";
 export default {
   data: () => ({
     Udata: {
@@ -118,6 +126,8 @@ export default {
       { text: "Image", value: "filename" },
       { text: "", value: "data-table-expand" },
     ],
+       exportData:[],
+    fileName:"",
   }),
 
   props: ["data", "dialog"],
@@ -138,8 +148,25 @@ export default {
         .then((res) => {
           this.desserts = res.data.photoType;
           this.loadTable = false;
-          console.log(this.res);
+          let exportData = res.data.photoType.map((item) => {
+            return {
+              "Subscriber_Name": this.IData.firstName.toUpperCase() +
+                    " " +
+                    this.IData.lastName.toUpperCase(),
+              "Reference_No":  this.Rdata.preferenceNo ,
+              "Name": item.NAME,
+              "Code": item.code,
+              "Image": item.filename,
+              " Date": item.dtcreated ? moment(item.dtcreated).format("MMMM DD, YYYY hh:mm:ss") : "",
+              
+            };
+          });
+          this.fileName = `Ibas_photo_${moment(
+            moment().toDate()
+          ).format("MMM_DD_YYYY")}`;
+          this.exportData = exportData;
         });
+      
       //this.loadPhoto();
     },
   },
