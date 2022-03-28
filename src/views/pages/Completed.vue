@@ -13,6 +13,7 @@
         <v-toolbar-title>Completed JO</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
+
         <v-text-field
           v-model="search"
           append-icon="mdi-magnify"
@@ -20,7 +21,13 @@
           single-line
           hide-details
         ></v-text-field>
-
+        <v-spacer></v-spacer>
+        <v-btn color="primary" class="ml-auto">
+          <download-csv :data="exportData" :name="`${fileName}.csv`">
+            <v-icon dense>mdi-download</v-icon>
+            Export
+          </download-csv>
+        </v-btn>
         <PhotoDialog
           :data="approveData"
           :dialog="photoDialog.dialog"
@@ -51,7 +58,7 @@
   </v-data-table>
 </template>
 <script>
-//import moment from "moment";
+import moment from "moment";
 //import axios from "axios";
 import PhotoDialog from "../dialogs/photo.vue";
 import MaterialsDialog from "../dialogs/materials.vue";
@@ -70,10 +77,22 @@ export default {
     loadTable: false,
     headers: [
       {
+        text: "Date Installed",
+        align: "start",
+        sortable: true,
+        value: "activationDateLabel",
+      },
+      {
         text: "Reference Number",
         align: "start",
         sortable: true,
         value: "referenceNumber",
+      },
+      {
+        text: "JO No.",
+
+        sortable: true,
+        value: "account.jo_no",
       },
       {
         text: "First Name",
@@ -102,6 +121,11 @@ export default {
       code: "",
     },
     modalScheduleDate: false,
+    exportData: [],
+    fileName: "",
+    Rdata: {
+      preferenceNo: "",
+    },
   }),
 
   computed: {
@@ -145,6 +169,45 @@ export default {
           this.desserts = newArr;
           this.loadTable = false;
           //this.table.loading = false;
+
+          for (let i = 0; i < newArr.length; i++) {
+            this.tmp = {
+              Date_Installed: newArr[i].activationDateLabel,
+              JO_No: newArr[i].account.jo_no,
+              Account_No: newArr[i].accountNumber,
+              Reference_No: newArr[i].referenceNumber,
+            };
+            this.Rdata.preferenceNo = newArr[i].referenceNumber;
+            this.$api2
+              .post("/Ibas/MaterialsWeb", this.Rdata, {
+                //headers: {
+                // Authorization: `Bearer ${this.authToken}`,
+                // Accept: "application/json",
+                //},
+              })
+              .then((res) => {
+                const newMaterials = res.data.materials;
+                var obj = {};
+                for (var x = 0; x < newMaterials.length; x++) {
+                  obj["Date_Installed"] = newArr[i].activationDateLabel;
+                  obj["JO_No"] = newArr[i].account.jo_no;
+                  obj["Account_No"] = newArr[i].accountNumber;
+                  obj["Reference_No"] = newArr[i].referenceNumber;
+                  obj["Serial_No"] = newArr[i].serialNumber;
+
+                  obj[newMaterials[x]["NAME"]] = newMaterials[x]["quantity"];
+                }
+                //let z=Object.assign(this.tmp, obj)
+                this.exportData.push(obj);
+                //console.log(obj);
+                //let exportData.push(obj;
+                this.fileName = `Ibas_materials_${moment(
+                  moment().toDate()
+                ).format("MMM_DD_YYYY")}`;
+                // this.exportData = exportData;
+                // console.log(this.exportData);
+              });
+          }
         })
         .catch((e) => {
           //this.table.loading = false;
@@ -164,7 +227,6 @@ export default {
     },
 
     ItemConfirm() {
-      
       // var TToken = localStorage.getItem("token");
       console.log("ItemConfirm " + this.materialsData.referenceNumber);
       this.editedItem.referenceNumber = this.materialsData.referenceNumber;
@@ -191,10 +253,8 @@ export default {
           console.log(e);
           //this.loadingBtn = false;
         });
-     this.materialsDialog.dialog = false;
+      this.materialsDialog.dialog = false;
     },
-
-   
   },
 };
 </script>

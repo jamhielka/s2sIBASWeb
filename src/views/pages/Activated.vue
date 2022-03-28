@@ -75,9 +75,15 @@ export default {
         sortable: true,
         value: "referenceNumber",
       },
+       {
+        text: "JO No.",
+      
+        sortable: true,
+        value: "account.jo_no",
+      },
       {
         text: "First Name",
-        align: "start",
+       
         sortable: false,
         value: "firstName",
       },
