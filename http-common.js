@@ -13,7 +13,7 @@ export const API = axios.create({
  // }
 });
 export const API2 = axios.create({
-  baseURL: `http://localhost:5001/api`,
+  baseURL: `http://161.49.63.45:8087/api`,
   headers: {
     'Content-Type': 'application/json',
   },
