@@ -49,12 +49,13 @@
 
               <div v-if="item.filename">
                 <div>
-                  <a href="#" @click.prevent="downloadImage(item.filename)">
+                  
                     <img
                       :src="item.filename"
                       style="width: 50px; height: 50px"
+                      @click="downloadImage(item.filename)"
                     />
-                  </a>
+                 
 
                 </div>
               </div>
@@ -90,8 +91,10 @@
 </template>
 
 <script>
+import { saveAs } from 'file-saver';
 import axios from "axios";
 import moment from "moment";
+//import saveAs() from file-saver;
 export default {
   data: () => ({
     Udata: {
@@ -169,23 +172,30 @@ export default {
   },
   methods: {
     downloadImage(url) {
+      //var FileSaver = require('file-saver');
       const filename = url.split("/").pop();
-      fetch(url)
-        .then((resp) => resp.blob())
-        .then((blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.style.display = "none";
-          a.href = url;
-          // the filename you want
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-        })
-        .catch((err) => alert(err));
+      // FileSaver.saveAs(url, filename);
+   
+     saveAs(url,filename);
+      // fetch(url)
+      //   .then((resp) => resp.blob())
+      //   .then((blob) => {
+      //     const url = window.URL.createObjectURL(blob);
+      //     const a = document.createElement("a");
+      //     a.style.display = "none";
+      //     a.href = url;
+      //     // the filename you want
+      //     a.download = filename;
+      //     document.body.appendChild(a);
+      //     a.click();
+      //     window.URL.revokeObjectURL(url);
+      //   })
+      //   .catch((err) => alert(err));
+     
     },
     downloadImg(responseUrl) {
+     // this.responseUrl="https://localhost:5001/Photo/986986796_P01.jpg";
+  //debugger
       axios({
         method: "GET",
         url: responseUrl, //
@@ -221,3 +231,4 @@ export default {
   },
 };
 </script>
+
