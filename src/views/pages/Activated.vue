@@ -7,6 +7,10 @@
     loading-text="Loading... Please wait"
     sort-by="name"
     class="elevation-1"
+    :page="page"
+    :pageCount="numberOfPages"
+    :options.sync="options"
+    :server-items-length="totalPassengers"
   >
     <template v-slot:top>
       <v-toolbar flat>
@@ -19,6 +23,8 @@
           label="Search"
           single-line
           hide-details
+          @click:append="searchRecord"
+          @keydown.enter.prevent="searchRecord"
         ></v-text-field>
 
         <PhotoDialog
@@ -61,13 +67,19 @@ export default {
     MaterialsDialog,
   },
   data: () => ({
+    page: 0,
+    totalPassengers: 0,
+    numberOfPages: 0,
     search: "",
     approveData: {},
     materialsData: {},
 
     photoDialog: { dialog: false },
     materialsDialog: { dialog: false },
-    loadTable: false,
+    loadTable: true,
+     options: {
+      page: 1,
+    },
     headers: [
       {
         text: "Reference Number",
@@ -75,15 +87,15 @@ export default {
         sortable: true,
         value: "referenceNumber",
       },
-       {
+      {
         text: "JO No.",
-      
+
         sortable: true,
         value: "account.jo_no",
       },
       {
         text: "First Name",
-       
+
         sortable: false,
         value: "firstName",
       },
@@ -117,6 +129,12 @@ export default {
   },
 
   watch: {
+    options: {
+      handler() {
+        this.getForMerchantList("", this.search);
+      },
+    },
+    deep: true,
     dialog(val) {
       val || this.close();
     },
@@ -125,32 +143,52 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-  },
+  // created() {
+  //   this.initialize();
+  // },
 
   methods: {
-    initialize() {
-      this.getForMerchantList();
-    },
+    // initialize() {
+    //   this.getForMerchantList();
+    // },
 
-    async getForMerchantList() {
+    async getForMerchantList(searchVal = "") {
+      this.loading = true;
+      const { page, itemsPerPage } = this.options;
+      let pageNumber = page ? page : 1;
+      console.log(itemsPerPage);
+      const perPage = itemsPerPage < 0 ? this.totalPassengers : itemsPerPage;
       // this.table.loading = true;
+
       var TToken = localStorage.getItem("token");
       // console.log(TToken);
       await this.$api
-        .get("acquisition/report?report=activated", {
-          headers: {
-            "wsc-token": TToken,
-          },
-        })
+        .get(
+          "acquisition/report?report=activated" +
+            "&status=" +
+            "&page=" +
+            pageNumber +
+            "&limit=" +
+            perPage +
+            "&searchVal=" +
+            searchVal,
+          {
+            headers: {
+              "wsc-token": TToken,
+            },
+          }
+        )
 
         .then((response) => {
           //  console.log(response);
           const newArr = response.data.data;
           this.desserts = newArr;
           this.loadTable = false;
-          //this.table.loading = false;
+          this.totalPassengers = response.data.total;
+          this.numberOfPages = Math.ceil(response.data.total / itemsPerPage);
+                 console.log(response.data.total+"|" +itemsPerPage +"|" +this.numberOfPages);
+        
+         // console.log(this.totalPassengers);
         })
         .catch((e) => {
           //this.table.loading = false;
@@ -170,7 +208,6 @@ export default {
     },
 
     ItemConfirm() {
-      
       // var TToken = localStorage.getItem("token");
       console.log("ItemConfirm " + this.materialsData.referenceNumber);
       this.editedItem.referenceNumber = this.materialsData.referenceNumber;
@@ -197,10 +234,18 @@ export default {
           console.log(e);
           //this.loadingBtn = false;
         });
-     this.materialsDialog.dialog = false;
+      this.materialsDialog.dialog = false;
     },
+    searchRecord() {
+      if (!this.search) {
+        return;
+      }
 
-   
+      this.getForMerchantList(this.search);
+    },
+  },
+  mounted() {
+    this.getForMerchantList();
   },
 };
 </script>

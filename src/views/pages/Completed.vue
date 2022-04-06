@@ -7,6 +7,10 @@
     loading-text="Loading... Please wait"
     sort-by="name"
     class="elevation-1"
+    :page="page"
+    :pageCount="numberOfPages"
+    :options.sync="options"
+    :server-items-length="totalPassengers"
   >
     <template v-slot:top>
       <v-toolbar flat>
@@ -20,6 +24,8 @@
           label="Search"
           single-line
           hide-details
+          @click:append="searchRecord"
+          @keydown.enter.prevent="searchRecord"
         ></v-text-field>
         <v-spacer></v-spacer>
         <v-btn color="primary" class="ml-auto">
@@ -68,6 +74,9 @@ export default {
     MaterialsDialog,
   },
   data: () => ({
+    page: 0,
+    totalPassengers: 0,
+    numberOfPages: 0,
     search: "",
     approveData: {},
     materialsData: {},
@@ -75,6 +84,9 @@ export default {
     photoDialog: { dialog: false },
     materialsDialog: { dialog: false },
     loadTable: false,
+    options: {
+      page: 1,
+    },
     headers: [
       {
         text: "Date Installed",
@@ -135,6 +147,11 @@ export default {
   },
 
   watch: {
+    options: {
+      handler() {
+        this.getForMerchantList("", this.search);
+      },
+    },
     dialog(val) {
       val || this.close();
     },
@@ -143,25 +160,40 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-  },
+  // created() {
+  //   this.initialize();
+  // },
 
   methods: {
-    initialize() {
-      this.getForMerchantList();
-    },
+    // initialize() {
+    //   this.getForMerchantList();
+    // },
 
-    async getForMerchantList() {
+    async getForMerchantList(searchVal = "") {
+      this.loading = true;
+      const { page, itemsPerPage } = this.options;
+      let pageNumber = page ? page : 1;
+      console.log(itemsPerPage);
+      const perPage = itemsPerPage < 0 ? this.totalPassengers : itemsPerPage;
       // this.table.loading = true;
       var TToken = localStorage.getItem("token");
       // console.log(TToken);
       await this.$api
-        .get("acquisition/report?report=completed-jo", {
-          headers: {
-            "wsc-token": TToken,
-          },
-        })
+        .get(
+          "acquisition/report?report=completed-jo" +
+            "&status=" +
+            "&page=" +
+            pageNumber +
+            "&limit=" +
+            perPage +
+            "&searchVal=" +
+            searchVal,
+          {
+            headers: {
+              "wsc-token": TToken,
+            },
+          }
+        )
 
         .then((response) => {
           //  console.log(response);
@@ -169,6 +201,11 @@ export default {
           this.desserts = newArr;
           this.loadTable = false;
           //this.table.loading = false;
+          this.totalPassengers = response.data.total;
+          this.numberOfPages = Math.ceil(response.data.total / itemsPerPage);
+          console.log(
+            response.data.total + "|" + itemsPerPage + "|" + this.numberOfPages
+          );
 
           for (let i = 0; i < newArr.length; i++) {
             this.tmp = {
@@ -194,7 +231,6 @@ export default {
                   obj["Account_No"] = newArr[i].accountNumber;
                   obj["Reference_No"] = newArr[i].referenceNumber;
                   obj["Serial_No"] = newArr[i].serialNumber;
-
                   obj[newMaterials[x]["NAME"]] = newMaterials[x]["quantity"];
                 }
                 //let z=Object.assign(this.tmp, obj)
@@ -255,6 +291,16 @@ export default {
         });
       this.materialsDialog.dialog = false;
     },
+    searchRecord() {
+      if (!this.search) {
+        return;
+      }
+
+      this.getForMerchantList(this.search);
+    },
+  },
+  mounted() {
+    this.getForMerchantList();
   },
 };
 </script>
