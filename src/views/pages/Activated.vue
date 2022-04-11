@@ -93,6 +93,8 @@ export default {
         sortable: true,
         value: "account.jo_no",
       },
+          { text: "Serial Number", value: "serialNumber" },
+      
       {
         text: "First Name",
 
@@ -100,8 +102,9 @@ export default {
         value: "firstName",
       },
       { text: "Last Name", value: "lastName" },
-      { text: "address", value: "address" },
-      { text: "city", value: "city" },
+
+       { text: "City", value: "city" },
+
       { text: "Actions", value: "actions", sortable: false },
     ],
     desserts: [],
@@ -161,7 +164,7 @@ export default {
       // this.table.loading = true;
 
       var TToken = localStorage.getItem("token");
-      // console.log(TToken);
+     console.log(TToken);
       await this.$api
         .get(
           "acquisition/report?report=activated" +
@@ -180,7 +183,7 @@ export default {
         )
 
         .then((response) => {
-          //  console.log(response);
+          console.log(response);
           const newArr = response.data.data;
           this.desserts = newArr;
           this.loadTable = false;

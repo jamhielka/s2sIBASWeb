@@ -105,16 +105,18 @@ export default {
 
         sortable: true,
         value: "account.jo_no",
-      },
+      },  { text: "Serial Number", value: "serialNumber" },
+      
       {
         text: "First Name",
-        align: "start",
+
         sortable: false,
         value: "firstName",
       },
       { text: "Last Name", value: "lastName" },
-      { text: "address", value: "address" },
-      { text: "city", value: "city" },
+
+       { text: "City", value: "city" },
+
       { text: "Actions", value: "actions", sortable: false },
     ],
     desserts: [],
@@ -231,6 +233,7 @@ export default {
                   obj["Account_No"] = newArr[i].accountNumber;
                   obj["Reference_No"] = newArr[i].referenceNumber;
                   obj["Serial_No"] = newArr[i].serialNumber;
+                   obj["Installer Name"] = newMaterials[x]["installerName"];
                   obj[newMaterials[x]["NAME"]] = newMaterials[x]["quantity"];
                 }
                 //let z=Object.assign(this.tmp, obj)

@@ -30,12 +30,13 @@
               </div>
             </div>
           </v-card-title>
-<v-btn color="primary" class="ml-auto">
-                    <download-csv :data="exportData" :name="`${fileName}.csv`">
-                      <v-icon dense>mdi-download</v-icon>
-                      Export
-                    </download-csv>
-                  </v-btn>
+          <v-btn color="primary" class="ml-auto" @click="download_btn">
+            <!-- <download-csv :data="exportData" :name="`${fileName}.csv`">
+              <v-icon dense>mdi-download</v-icon>
+              Export
+            </download-csv> -->
+            Download Images
+          </v-btn>
 
           <v-data-table
             :headers="headers"
@@ -46,9 +47,8 @@
             class="elevation-1"
           >
             <template v-slot:[`item.filename`]="{ item }">
-
               <div v-if="item.filename">
-                <div>
+                <!-- <div>
                   
                     <img
                       :src="item.filename"
@@ -57,6 +57,13 @@
                     />
                  
 
+                </div> -->
+                <div class="images" v-viewer>
+                  <img
+                    style="width: 50px; height: 50px"
+                    :src="item.filename"
+                    :key="item.filename"
+                  />
                 </div>
               </div>
               <div v-else></div>
@@ -91,9 +98,12 @@
 </template>
 
 <script>
-import { saveAs } from 'file-saver';
+import { saveAs } from "file-saver";
 import axios from "axios";
-import moment from "moment";
+//import moment from "moment";
+import "viewerjs/dist/viewer.css";
+import JsZip from "jszip";
+
 //import saveAs() from file-saver;
 export default {
   data: () => ({
@@ -126,8 +136,9 @@ export default {
       { text: "Image", value: "filename" },
       { text: "", value: "data-table-expand" },
     ],
-       exportData:[],
-    fileName:"",
+    exportData: [],
+    fileName: "",
+    Timages: {},
   }),
 
   props: ["data", "dialog"],
@@ -148,25 +159,36 @@ export default {
         .then((res) => {
           this.desserts = res.data.photoType;
           this.loadTable = false;
-          let exportData = res.data.photoType.map((item) => {
-            return {
-              "Subscriber_Name": this.IData.firstName.toUpperCase() +
-                    " " +
-                    this.IData.lastName.toUpperCase(),
-              "Reference_No":  this.Rdata.preferenceNo ,
-              "Name": item.NAME,
-              "Code": item.code,
-              "Image": item.filename,
-              " Date": item.dtcreated ? moment(item.dtcreated).format("MMMM DD, YYYY hh:mm:ss") : "",
-              
-            };
-          });
-          this.fileName = `Ibas_photo_${moment(
-            moment().toDate()
-          ).format("MMM_DD_YYYY")}`;
-          this.exportData = exportData;
+          const newArr = res.data.photoType;
+          this.Timages = newArr;
+          // let exportData = res.data.photoType.map((item) => {
+          //   return {
+          //     Subscriber_Name:
+          //       this.IData.firstName.toUpperCase() +
+          //       " " +
+          //       this.IData.lastName.toUpperCase(),
+          //     Reference_No: this.Rdata.preferenceNo,
+          //     Name: item.NAME,
+          //     Code: item.code,
+          //     Image: item.filename,
+          //     " Date": item.dtcreated
+          //       ? moment(item.dtcreated).format("MMMM DD, YYYY hh:mm:ss")
+          //       : "",
+          //   };
+          // });
+          // this.fileName = `Ibas_photo_${moment(moment().toDate()).format(
+          //   "MMM_DD_YYYY"
+          // )}`;
+          // this.exportData = exportData;
+          this.fileName =
+            this.IData.firstName.toUpperCase() +
+            "_" +
+            this.IData.lastName.toUpperCase() +
+            "_" +
+            this.IData.account.jo_no +
+            ".zip";
         });
-      
+      console.log(this.Timages);
       //this.loadPhoto();
     },
   },
@@ -175,8 +197,8 @@ export default {
       //var FileSaver = require('file-saver');
       const filename = url.split("/").pop();
       // FileSaver.saveAs(url, filename);
-   
-     saveAs(url,filename);
+
+      saveAs(url, filename);
       // fetch(url)
       //   .then((resp) => resp.blob())
       //   .then((blob) => {
@@ -191,11 +213,10 @@ export default {
       //     window.URL.revokeObjectURL(url);
       //   })
       //   .catch((err) => alert(err));
-     
     },
     downloadImg(responseUrl) {
-     // this.responseUrl="https://localhost:5001/Photo/986986796_P01.jpg";
-  //debugger
+      // this.responseUrl="https://localhost:5001/Photo/986986796_P01.jpg";
+      //debugger
       axios({
         method: "GET",
         url: responseUrl, //
@@ -227,6 +248,32 @@ export default {
     },
     close() {
       this.$emit("close", false);
+    },
+   async  download_btn() {
+      var zip = new JsZip();
+      var img = zip.folder("images");
+      let fileDownload = this.fileName;
+      for (let i = 0; i < this.Timages.length; i++) {
+          const lastItem = this.Timages[i].filename.substring(
+            this.Timages[i].filename.lastIndexOf("/") + 1
+          );
+
+    // Fetch the image and parse the response stream as a blob
+    const imageBlob = await fetch(this.Timages[i].filename).then(response => response.blob());
+
+    // create a new file from the blob object
+    const imgData = new File([imageBlob], lastItem);
+        if (this.Timages[i].filename != "") {
+          img.file(lastItem, imgData, { base64: true });
+        }
+      }
+      zip
+        .generateAsync({
+          type: "blob",
+        })
+        .then(function (content) {
+          saveAs(content, fileDownload);
+        });
     },
   },
 };
